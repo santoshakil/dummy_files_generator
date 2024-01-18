@@ -7,8 +7,8 @@ use std::thread;
 
 const CHUNK_SIZE: usize = 1_048_576; // 1MB in bytes
 
-const LARGE_FILE_SIZE: usize = 597_152; // 500MB in KB
-const MEDIUM_FILE_SIZE: usize = 204_800; // 200MB in KB
+const LARGE_FILE_SIZE: usize = 307_152; // 500MB in KB
+const MEDIUM_FILE_SIZE: usize = 104_800; // 200MB in KB
 const SMALL_FILE_SIZE: usize = 1024; // 1MB in KB
 
 const LARGE_FILE_COUNT: usize = 20;
@@ -32,7 +32,7 @@ fn create_file(file_path: String, file_size: usize) {
 }
 
 fn main() {
-    let drive_location = "/Volumes/Encrypted";
+    let drive_location = "./dummy";
 
     // Create root directories
     fs::create_dir_all(format!("{}/src", drive_location)).unwrap();
