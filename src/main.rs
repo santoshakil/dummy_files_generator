@@ -1,4 +1,5 @@
 use rand::Rng;
+use rayon::prelude::*;
 use std::fs::{self, OpenOptions};
 use std::io::BufWriter;
 use std::io::Write;
@@ -35,7 +36,7 @@ fn main() {
 
     let small_files_thread = thread::spawn(move || {
         // Generate small files
-        for i in 0..SMALL_FILE_COUNT {
+        (0..SMALL_FILE_COUNT).into_par_iter().for_each(|i| {
             let random_folder1: u32 = rand::thread_rng().gen_range(0..1000);
             let random_folder2: u32 = rand::thread_rng().gen_range(0..1000);
             let dir = if i % 2 == 0 { "src" } else { "dst" };
@@ -49,12 +50,12 @@ fn main() {
             ))
             .unwrap();
             create_file(file_path, SMALL_FILE_SIZE);
-        }
+        });
     });
 
     let medium_files_thread = thread::spawn(move || {
         // Generate medium files
-        for i in 0..MEDIUM_FILE_COUNT {
+        (0..MEDIUM_FILE_COUNT).into_par_iter().for_each(|i| {
             let random_folder1: u32 = rand::thread_rng().gen_range(0..1000);
             let random_folder2: u32 = rand::thread_rng().gen_range(0..1000);
             let file_path = format!(
@@ -67,12 +68,12 @@ fn main() {
             ))
             .unwrap();
             create_file(file_path, MEDIUM_FILE_SIZE);
-        }
+        });
     });
 
     let large_files_thread = thread::spawn(move || {
         // Generate large files
-        for i in 0..LARGE_FILE_COUNT {
+        (0..LARGE_FILE_COUNT).into_par_iter().for_each(|i| {
             let random_folder1: u32 = rand::thread_rng().gen_range(0..1000);
             let random_folder2: u32 = rand::thread_rng().gen_range(0..1000);
             let file_path = format!(
@@ -85,7 +86,7 @@ fn main() {
             ))
             .unwrap();
             create_file(file_path, LARGE_FILE_SIZE);
-        }
+        });
     });
 
     small_files_thread.join().unwrap();
