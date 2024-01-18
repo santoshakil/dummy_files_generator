@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::fs::{self, OpenOptions};
 use std::io::BufWriter;
 use std::io::Write;
@@ -9,6 +10,19 @@ const LARGE_FILE_COUNT: usize = 10;
 const MEDIUM_FILE_COUNT: usize = 100;
 const SMALL_FILE_COUNT: usize = 999_890;
 
+fn create_file(file_path: String, file_size: usize) {
+    let file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open(&file_path)
+        .unwrap();
+    let mut writer = BufWriter::new(file);
+    for _ in 0..file_size {
+        writer.write_all(&[0; 1024]).unwrap(); // Write 1KB of zeros
+    }
+    println!("File {} created.", file_path);
+}
+
 fn main() {
     let drive_location = "/Volumes/Encrypted";
 
@@ -19,53 +33,23 @@ fn main() {
     println!("Root directories created.");
 
     // Generate large files
-    for i in 0..LARGE_FILE_COUNT {
+    (0..LARGE_FILE_COUNT).into_par_iter().for_each(|i| {
         let file_path = format!("{}/src/large_file{}.txt", drive_location, i);
-        let file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(file_path)
-            .unwrap();
-        let mut writer = BufWriter::new(file);
-        for _ in 0..LARGE_FILE_SIZE {
-            writer.write_all(&[0; 1024]).unwrap(); // Write 1KB of zeros
-        }
-        println!("Large file {} created.", i);
-    }
+        create_file(file_path, LARGE_FILE_SIZE);
+    });
 
     // Generate medium files
-    for i in 0..MEDIUM_FILE_COUNT {
+    (0..MEDIUM_FILE_COUNT).into_par_iter().for_each(|i| {
         let file_path = format!("{}/dst/medium_file{}.txt", drive_location, i);
-        let file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(file_path)
-            .unwrap();
-        let mut writer = BufWriter::new(file);
-        for _ in 0..MEDIUM_FILE_SIZE {
-            writer.write_all(&[0; 1024]).unwrap(); // Write 1KB of zeros
-        }
-        println!("Medium file {} created.", i);
-    }
+        create_file(file_path, MEDIUM_FILE_SIZE);
+    });
 
     // Generate small files
-    for i in 0..SMALL_FILE_COUNT {
+    (0..SMALL_FILE_COUNT).into_par_iter().for_each(|i| {
         let dir = if i % 2 == 0 { "src" } else { "dst" };
         let file_path = format!("{}/{}/small_file{}.txt", drive_location, dir, i);
-        let file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(file_path)
-            .unwrap();
-        let mut writer = BufWriter::new(file);
-        for _ in 0..SMALL_FILE_SIZE {
-            writer.write_all(&[0; 1024]).unwrap(); // Write 1KB of zeros
-        }
-        if i % 10000 == 0 {
-            // Print progress every 10000 files
-            println!("Small file {} created.", i);
-        }
-    }
+        create_file(file_path, SMALL_FILE_SIZE);
+    });
 
     println!("All files created.");
 }
