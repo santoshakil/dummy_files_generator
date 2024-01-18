@@ -5,12 +5,15 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::thread;
 
-const LARGE_FILE_SIZE: usize = 2_097_152; // 2GB in KB
+const CHUNK_SIZE: usize = 1_048_576; // 1MB in bytes
+
+const LARGE_FILE_SIZE: usize = 597_152; // 500MB in KB
 const MEDIUM_FILE_SIZE: usize = 204_800; // 200MB in KB
-const SMALL_FILE_SIZE: usize = 24; // 24KB in KB
-const LARGE_FILE_COUNT: usize = 10;
+const SMALL_FILE_SIZE: usize = 1024; // 1MB in KB
+
+const LARGE_FILE_COUNT: usize = 20;
 const MEDIUM_FILE_COUNT: usize = 100;
-const SMALL_FILE_COUNT: usize = 999_890;
+const SMALL_FILE_COUNT: usize = 999_880;
 
 fn create_file(file_path: String, file_size: usize) {
     let file = OpenOptions::new()
@@ -19,9 +22,12 @@ fn create_file(file_path: String, file_size: usize) {
         .open(&file_path)
         .unwrap();
     let mut writer = BufWriter::new(file);
-    for _ in 0..file_size {
-        writer.write_all(&[0; 1024]).unwrap(); // Write 1KB of zeros
+    let chunks = file_size / CHUNK_SIZE;
+    let remainder = file_size % CHUNK_SIZE;
+    for _ in 0..chunks {
+        writer.write_all(&vec![0; CHUNK_SIZE]).unwrap(); // Write 1MB of zeros
     }
+    writer.write_all(&vec![0; remainder]).unwrap(); // Write the remaining bytes
     println!("File {} created.", file_path);
 }
 
